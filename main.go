@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 
 	"github.com/s3rj1k/go-fanotify/fanotify"
 	"golang.org/x/sys/unix"
@@ -74,6 +75,11 @@ func getCmdline(pid int) string {
 		return ""
 	}
 	return dest
+}
+
+func logEntry(msg string) string {
+	t := time.Now()
+	return t.Format(time.RFC3339Nano) + " " + msg
 }
 
 func main() {
@@ -165,7 +171,7 @@ func main() {
 		if err != nil {
 			return "", fmt.Errorf("Path routine/ %w", err)
 		}
-		fmt.Printf("EVENT %d -> PID:%d path:%s\n", data.Mask, data.GetPID(), filePath)
+		evt := fmt.Sprintf("EVENT %d -> PID:%d path:%s ", data.Mask, data.GetPID(), filePath)
 
 		if path == filePath {
 			fmt.Printf("Credentials file being accesses\n")
@@ -174,7 +180,7 @@ func main() {
 				fmt.Printf("Process allowed to read vault: %s, %d\n", caller, data.GetPID())
 				lastPidConsumer = data.GetPID()
 				notify.ResponseAllow(data)
-				return "ACCESS_GRANTED_VAULT", nil
+				return logEntry(evt + " -> ACCESS_GRANTED_VAULT"), nil
 			} else if caller != cons {
 				// it might be generator
 				parent := getParentPid(data.GetPID())
@@ -182,19 +188,19 @@ func main() {
 					fmt.Printf("Process allowed to read vault: %s, %d\n", caller, data.GetPID())
 					lastPidConsumer = data.GetPID()
 					notify.ResponseAllow(data)
-					return "ACCESS_GRANTED_VAULT_", nil
+					return logEntry(evt + " -> ACCESS_GRANTED_VAULT_"), nil
 				} else {
 					parentCmd := getCmdline(getParentPid(data.GetPID()))
 					fmt.Printf("Process not allowed to read vault: %s, %d, parent=%s\n",
 						caller, data.GetPID(), parentCmd)
 					notify.ResponseDeny(data)
-					return "ACCESS_DENIED_VAULT_", nil
+					return logEntry(evt + " -> ACCESS_DENIED_VAULT_"), nil
 				}
 			} else {
 				fmt.Printf("Process is not allowed to read vault: %s, %d, parent=%s\n",
 					caller, data.GetPID(), getCmdline(getParentPid(data.GetPID())))
 				notify.ResponseDeny(data)
-				return "ACCESS_DENIED_VAULT", nil
+				return logEntry(evt + " -> ACCESS_DENIED_VAULT"), nil
 			}
 		} else if cons == filePath {
 			if lastPidConsumer != data.GetPID() {
@@ -202,22 +208,22 @@ func main() {
 				lastPidConsumer = data.GetPID()
 			}
 			notify.ResponseAllow(data)
-			return "ACCESS_GRANTED_CONSUMER", nil
+			return logEntry(evt + " -> ACCESS_GRANTED_CONSUMER"), nil
 		} else if gen == filePath {
 			ppid := getParentPid(data.GetPID())
 			if ppid == os.Getpid() && lastPidprovider != data.GetPID() {
 				fmt.Printf("provider was executed by micro vault\n")
 				lastPidprovider = data.GetPID()
 				notify.ResponseAllow(data)
-				return "ACCESS_GRANTED_CONSUMER_", nil
+				return logEntry(evt + " -> ACCESS_GRANTED_CONSUMER_"), nil
 			} else if ppid != os.Getpid() && data.MatchMask(unix.FAN_OPEN_EXEC) {
 				fmt.Printf("provider was NOT executed by micro vault: %s, pid=%d, ppid=%d, mypid=%d\n",
 					getCmdline(data.GetPID()), data.GetPID(), ppid, os.Getpid())
 				notify.ResponseDeny(data)
-				return "ACCESS_DENIED_CONSUMER_", nil
+				return logEntry(evt + " -> ACCESS_DENIED_CONSUMER_"), nil
 			} else {
 				notify.ResponseDeny(data)
-				return "ACCESS_DENIED_CONSUMER", nil
+				return logEntry(evt + " -> ACCESS_DENIED_CONSUMER"), nil
 			}
 		}
 
