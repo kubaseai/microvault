@@ -12,7 +12,7 @@ toor@laptop:/home/user/projects/microvault# cat consumer.sh
 #!/bin/sh
 echo "!!! This is consumer !!!"
 sleep 1
-cat ./credential
+cat ./credentials
 
 toor@laptop# ./microvault --path ./credentials --provider ./generator.sh --consumer ./consumer.sh 
 Initializing micro vault...
