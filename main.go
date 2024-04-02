@@ -34,7 +34,8 @@ const (
 )
 
 func runProvider() int {
-	fmt.Printf("-> Running provider %s by %d\n", gen, os.Getpid())
+	msg := fmt.Sprintf("-> Running provider %s by main program (pid=%d)\n", gen, os.Getpid())
+	fmt.Print(logEntry(msg))
 	envs := []string{}
 	args := []string{gen}
 	pwd, _ := os.Getwd()
@@ -45,7 +46,8 @@ func runProvider() int {
 			Sys:   &syscall.SysProcAttr{},
 			Files: []uintptr{0, 1, 2},
 		})
-	fmt.Printf("-> Started %s, %d\n", gen, childPID)
+	msg = fmt.Sprintf("-> Started %s, pid=%d\n", gen, childPID)
+	fmt.Print(logEntry(msg))
 	return childPID
 }
 
@@ -112,9 +114,9 @@ func main() {
 	cons, _ = filepath.Abs(cons)
 	gen, _ = filepath.Abs(gen)
 
-	fmt.Printf("Initializing micro vault...\n\n")
-	fmt.Printf("-> Vault file = %s\n", path)
-	fmt.Printf("-> provider file = %s\n", gen)
+	fmt.Print(logEntry("Initializing micro vault...\n\n"))
+	fmt.Printf("-> Vaulted file = %s\n", path)
+	fmt.Printf("-> Provider file = %s\n", gen)
 	fmt.Printf("-> Consumer file = %s\n\n", cons)
 
 	providerPid := runProvider()
@@ -158,7 +160,7 @@ func main() {
 	f := func(notify *fanotify.NotifyFD) (string, error) {
 		data, err := notify.GetEvent(mypid)
 		if err != nil {
-			return "", fmt.Errorf("Internal routine/ %w", err)
+			return "", fmt.Errorf("internal routine/ %w", err)
 		}
 
 		if data == nil {
@@ -169,15 +171,16 @@ func main() {
 
 		filePath, err := data.GetPath()
 		if err != nil {
-			return "", fmt.Errorf("Path routine/ %w", err)
+			return "", fmt.Errorf("path routine/ %w", err)
 		}
 		evt := fmt.Sprintf("EVENT %d -> PID:%d path:%s ", data.Mask, data.GetPID(), filePath)
 
 		if path == filePath {
-			fmt.Printf("Credentials file being accesses\n")
+			fmt.Print(logEntry("Vaulted file being accessed\n"))
 			caller := getCmdline(data.GetPID())
 			if caller == cons && lastPidConsumer != data.GetPID() {
-				fmt.Printf("Process allowed to read vault: %s, %d\n", caller, data.GetPID())
+				m := fmt.Sprintf("Process allowed to read vault: %s, pid=%d\n", caller, data.GetPID())
+				fmt.Print(logEntry(m))
 				lastPidConsumer = data.GetPID()
 				notify.ResponseAllow(data)
 				return logEntry(evt + " -> ACCESS_GRANTED_VAULT"), nil
@@ -185,26 +188,30 @@ func main() {
 				// it might be generator
 				parent := getParentPid(data.GetPID())
 				if data.GetPID() == providerPid || parent > 0 && parent == lastPidConsumer {
-					fmt.Printf("Process allowed to read vault: %s, %d\n", caller, data.GetPID())
+					m := fmt.Sprintf("Process allowed to read vault: %s, pid=%d\n", caller, data.GetPID())
+					fmt.Print(logEntry(m))
 					lastPidConsumer = data.GetPID()
 					notify.ResponseAllow(data)
 					return logEntry(evt + " -> ACCESS_GRANTED_VAULT_"), nil
 				} else {
 					parentCmd := getCmdline(getParentPid(data.GetPID()))
-					fmt.Printf("Process not allowed to read vault: %s, %d, parent=%s\n",
+					m := fmt.Sprintf("Process not allowed to read vault: %s, pid=%d, parent=%s\n",
 						caller, data.GetPID(), parentCmd)
+					fmt.Print(logEntry(m))
 					notify.ResponseDeny(data)
 					return logEntry(evt + " -> ACCESS_DENIED_VAULT_"), nil
 				}
 			} else {
-				fmt.Printf("Process is not allowed to read vault: %s, %d, parent=%s\n",
+				m := fmt.Sprintf("Process is not allowed to read vault: %s, pid=%d, parent=%s\n",
 					caller, data.GetPID(), getCmdline(getParentPid(data.GetPID())))
+				fmt.Print(logEntry(m))
 				notify.ResponseDeny(data)
 				return logEntry(evt + " -> ACCESS_DENIED_VAULT"), nil
 			}
 		} else if cons == filePath {
 			if lastPidConsumer != data.GetPID() {
-				fmt.Printf("Consumer exe being executed as pid=%d\n", data.GetPID())
+				m := fmt.Sprintf("Consumer exe being executed as pid=%d\n", data.GetPID())
+				fmt.Print(logEntry(m))
 				lastPidConsumer = data.GetPID()
 			}
 			notify.ResponseAllow(data)
@@ -212,13 +219,14 @@ func main() {
 		} else if gen == filePath {
 			ppid := getParentPid(data.GetPID())
 			if ppid == os.Getpid() && lastPidprovider != data.GetPID() {
-				fmt.Printf("provider was executed by micro vault\n")
+				fmt.Print(logEntry("Provider was executed by micro vault\n"))
 				lastPidprovider = data.GetPID()
 				notify.ResponseAllow(data)
 				return logEntry(evt + " -> ACCESS_GRANTED_CONSUMER_"), nil
 			} else if ppid != os.Getpid() && data.MatchMask(unix.FAN_OPEN_EXEC) {
-				fmt.Printf("provider was NOT executed by micro vault: %s, pid=%d, ppid=%d, mypid=%d\n",
+				m := fmt.Sprintf("Provider was NOT executed by micro vault: %s, pid=%d, ppid=%d, mypid=%d\n",
 					getCmdline(data.GetPID()), data.GetPID(), ppid, os.Getpid())
+				fmt.Print(logEntry(m))
 				notify.ResponseDeny(data)
 				return logEntry(evt + " -> ACCESS_DENIED_CONSUMER_"), nil
 			} else {
@@ -230,7 +238,7 @@ func main() {
 		return "EXIT", nil
 	}
 
-	fmt.Printf("-> Starting event pump\n")
+	fmt.Print(logEntry("-> Starting event pump\n"))
 
 	for {
 		str, err := f(notify)
