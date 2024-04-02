@@ -14,38 +14,38 @@ echo "!!! This is consumer !!!"
 sleep 1
 cat ./credentials
 
-toor@laptop# ./microvault --path ./credentials --provider ./generator.sh --consumer ./consumer.sh 
-Initializing micro vault...
+toor@laptop:/home/user/projects/microvault# ./microvault --path ./credentials --provider ./generator.sh --consumer ./consumer.sh 
+2024-04-02T12:27:33.728038921+02:00 Initializing micro vault...
 
--> Vault file = /home/user/projects/microvault/credentials
--> provider file = /home/user/projects/microvault/generator.sh
+-> Vaulted file = /home/user/projects/microvault/credentials
+-> Provider file = /home/user/projects/microvault/generator.sh
 -> Consumer file = /home/user/projects/microvault/consumer.sh
 
--> Running provider /home/user/projects/microvault/generator.sh by 11956
--> Started /home/user/projects/microvault/generator.sh, 11961
--> Starting event pump
-provider was executed by micro vault
+2024-04-02T12:27:33.72876466+02:00 -> Running provider /home/user/projects/microvault/generator.sh by main program (pid=25042)
+2024-04-02T12:27:33.730425859+02:00 -> Started /home/user/projects/microvault/generator.sh, pid=25047
+2024-04-02T12:27:33.731631468+02:00 -> Starting event pump
+2024-04-02T12:27:33.735981654+02:00 Provider was executed by micro vault
+2024-04-02T12:27:33.736136716+02:00 EVENT 65536 -> PID:25047 path:/home/user/projects/microvault/generator.sh  -> ACCESS_GRANTED_CONSUMER_
 !!!! This is generator !!!!
-2024-04-02T09:50:27.321091973+02:00 EVENT 65536 -> PID:11961 path:/home/user/projects/microvault/generator.sh  -> ACCESS_GRANTED_CONSUMER_
-Credentials file being accesses
-Process allowed to read vault: /usr/bin/dash, 11961
-2024-04-02T09:50:27.322765236+02:00 EVENT 65536 -> PID:11961 path:/home/user/projects/microvault/credentials  -> ACCESS_GRANTED_VAULT_
-Consumer exe being executed as pid=12258
-2024-04-02T09:51:27.099772614+02:00 EVENT 65536 -> PID:12258 path:/home/user/projects/microvault/consumer.sh  -> ACCESS_GRANTED_CONSUMER
-error: Internal routine/ fanotify: event error, read : text file busy
-2024-04-02T09:51:27.106310726+02:00 EVENT 65536 -> PID:12258 path:/home/user/projects/microvault/consumer.sh  -> ACCESS_GRANTED_CONSUMER
-Credentials file being accesses
-Process allowed to read vault: /usr/bin/cat, 12263
-2024-04-02T09:51:28.111662566+02:00 EVENT 65536 -> PID:12263 path:/home/user/projects/microvault/credentials  -> ACCESS_GRANTED_VAULT_
-Credentials file being accesses
-Process not allowed to read vault: /usr/bin/cat, 12378, parent=/usr/bin/bash
-2024-04-02T09:51:41.521114644+02:00 EVENT 65536 -> PID:12378 path:/home/user/projects/microvault/credentials  -> ACCESS_DENIED_VAULT_
-...
+2024-04-02T12:27:33.741818506+02:00 Vaulted file being accessed
+2024-04-02T12:27:33.742335918+02:00 Process allowed to read vault: /usr/bin/dash, pid=25047
+2024-04-02T12:27:33.742426098+02:00 EVENT 65536 -> PID:25047 path:/home/user/projects/microvault/credentials  -> ACCESS_GRANTED_VAULT_
+2024-04-02T12:27:42.457898265+02:00 Vaulted file being accessed
+2024-04-02T12:27:42.458995707+02:00 Process not allowed to read vault: /usr/bin/cat, pid=25152, parent=/usr/bin/bash
+2024-04-02T12:27:42.459115791+02:00 EVENT 65536 -> PID:25152 path:/home/user/projects/microvault/credentials  -> ACCESS_DENIED_VAULT_
+2024-04-02T12:27:44.655671299+02:00 Consumer exe being executed as pid=25190
+2024-04-02T12:27:44.655725913+02:00 EVENT 65536 -> PID:25190 path:/home/user/projects/microvault/consumer.sh  -> ACCESS_GRANTED_CONSUMER
+error: internal routine/ fanotify: event error, read : text file busy
+2024-04-02T12:27:44.658474991+02:00 EVENT 65536 -> PID:25190 path:/home/user/projects/microvault/consumer.sh  -> ACCESS_GRANTED_CONSUMER
+2024-04-02T12:27:45.664465502+02:00 Vaulted file being accessed
+2024-04-02T12:27:45.66499988+02:00 Process allowed to read vault: /usr/bin/cat, pid=25192
+2024-04-02T12:27:45.665100883+02:00 EVENT 65536 -> PID:25192 path:/home/user/projects/microvault/credentials  -> ACCESS_GRANTED_VAULT_
 
-toor@laptop:/home/user/projects/microvault# ./consumer.sh 
+toor@localhost:/home/user/projects/microvault# ./consumer.sh 
 !!! This is consumer !!!
-wto, 2 kwi 2024, 09:50:27 CEST
-root@user-ux360cak:/home/user/projects/microvault# cat ./credentials 
+Tue Apr  2 12:30:58 CEST 2024
+
+toor@laptop:/home/user/projects/microvault# cat ./credentials 
 cat: ./credentials: Operation not permitted
 toor@laptop:/home/user/projects/microvault#
 ``` 
