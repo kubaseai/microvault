@@ -228,16 +228,16 @@ func main() {
 				fmt.Print(logEntry("Provider was executed by micro vault\n"))
 				lastPidprovider = data.GetPID()
 				notify.ResponseAllow(data)
-				return logEntry(evt + " -> ACCESS_GRANTED_CONSUMER_"), nil
+				return logEntry(evt + " -> ACCESS_GRANTED_PROVIDER_"), nil
 			} else if ppid != os.Getpid() && data.MatchMask(unix.FAN_OPEN_EXEC) {
 				m := fmt.Sprintf("Provider was NOT executed by micro vault: %s, pid=%d, ppid=%d, mypid=%d\n",
 					getCmdline(data.GetPID()), data.GetPID(), ppid, os.Getpid())
 				fmt.Print(logEntry(m))
 				notify.ResponseDeny(data)
-				return logEntry(evt + " -> ACCESS_DENIED_CONSUMER_"), nil
+				return logEntry(evt + " -> ACCESS_DENIED_PROVIDER_"), nil
 			} else {
 				notify.ResponseDeny(data)
-				return logEntry(evt + " -> ACCESS_DENIED_CONSUMER"), nil
+				return logEntry(evt + " -> ACCESS_DENIED_PROVIDER"), nil
 			}
 		}
 
