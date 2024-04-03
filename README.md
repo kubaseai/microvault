@@ -50,8 +50,8 @@ cat: ./credentials: Operation not permitted
 toor@laptop:/home/user/projects/microvault#
 ```
 ### Usecase: Samba share mounted with protected credentials
-![mount without microvault](freenas_access_001.png)
+![mount without microvault](freenas-access-001.png)
 
-![microvault systemd service](freenas_access_002.png)
+![microvault systemd service](freenas-access-002.png)
 
-![operation not permitted](freenas_access_003.png)
+![operation not permitted](freenas-access-003.png)
