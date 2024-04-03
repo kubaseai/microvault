@@ -1,0 +1,18 @@
+[Unit]
+Description=Microvault Service
+Requires=syslog.socket
+Requires=var-run.mount
+After=var-run.mount
+Wants=network.target network-online.target
+After=network.target network-online.target
+Documentation=https://github.com/kubaseai/microvault
+
+[Service]
+Type=simple
+Environment=UV_PATH=/etc/storage/usvc1.access UV_PROVIDER=/etc/storage/provider.sh UV_CONSUMER=/sbin/mount.cifs
+ExecStart=/usr/sbin/microvault
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target
+Alias=syslog.service
