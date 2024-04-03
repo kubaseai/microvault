@@ -25,7 +25,7 @@ toor@laptop:/home/user/projects/microvault# ./microvault --path ./credentials --
 2024-04-02T12:27:33.730425859+02:00 -> Started /home/user/projects/microvault/generator.sh, pid=25047
 2024-04-02T12:27:33.731631468+02:00 -> Starting event pump
 2024-04-02T12:27:33.735981654+02:00 Provider was executed by micro vault
-2024-04-02T12:27:33.736136716+02:00 EVENT 65536 -> PID:25047 path:/home/user/projects/microvault/generator.sh  -> ACCESS_GRANTED_CONSUMER_
+2024-04-02T12:27:33.736136716+02:00 EVENT 65536 -> PID:25047 path:/home/user/projects/microvault/generator.sh  -> ACCESS_GRANTED_PROVIDER_
 !!!! This is generator !!!!
 2024-04-02T12:27:33.741818506+02:00 Vaulted file being accessed
 2024-04-02T12:27:33.742335918+02:00 Process allowed to read vault: /usr/bin/dash, pid=25047
@@ -48,7 +48,10 @@ Tue Apr  2 12:30:58 CEST 2024
 toor@laptop:/home/user/projects/microvault# cat ./credentials 
 cat: ./credentials: Operation not permitted
 toor@laptop:/home/user/projects/microvault#
-``` 
+```
+### Usecase: Samba share mounted with protected credentials
+![mount without microvault](freenas_access_001.png)
 
+![microvault systemd service](freenas_access_002.png)
 
-
+![operation not permitted](freenas_access_003.png)
