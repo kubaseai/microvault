@@ -48,6 +48,12 @@ func runProvider() int {
 		})
 	msg = fmt.Sprintf("-> Started %s, pid=%d\n", gen, childPID)
 	fmt.Print(logEntry(msg))
+	child, err := os.FindProcess(childPID)
+	if err == nil {
+		status, _ := child.Wait()
+		msg = fmt.Sprintf("Child exited with code %d\n", status.ExitCode())
+		fmt.Print(logEntry(msg))
+	}
 	return childPID
 }
 
